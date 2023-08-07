@@ -1,24 +1,68 @@
 
+// int subarraySum(int* nums, int numsSize, int k)
+// {
+//     if(nums == NULL || numsSize <= 0)
+//     {
+//         //robust
+//         return 0;
+//     }
+//     int count = 0;
+//     int *sum = (int *)malloc((numsSize + 1)*sizeof(int));
+//     memset(sum, 0, sizeof(sum));
+//     for(int i = 0; i<numsSize;i++)
+//     {
+        
+//         sum[i+1] = sum[i] + nums[i];
+//         for(int j=0;j<=i;j++)
+//         {
+//             if(sum(i+1) - sum[j] == k)
+//             {
+//                 count++;
+//             }
+//         }
+//     }
+// }
+
+typedef struct
+{
+    // key 用于存储累积和，value 用于存储具有该累积和的子数组计数
+    int key;
+    int value;
+    UT_hash_handle hh;
+} HASH_TABLE;
+
+
 int subarraySum(int* nums, int numsSize, int k)
 {
-    if(nums == NULL || numsSize <= 0)
+    HASH_TABLE* hp = NULL;
+    HASH_TABLE* p = NULL;
+    p = malloc(sizeof(HASH_TABLE));
+    p->key = 0;
+    p->value = 1;
+    //使用 "uthash" 库中的 "HASH_ADD_INT" 宏将其添加到哈希表 "hp" 中
+    HASH_ADD_INT(hp, key, p);
+    int cur = 0;
+    int ret = 0;
+    for(int i = 0; i<numsSize; i++)
     {
-        //robust
-        return 0;
-    }
-    int count = 0;
-    int *sum = (int *)malloc((numsSize + 1)*sizeof(int));
-    memset(sum, 0, sizeof(sum));
-    for(int i = 0; i<numsSize;i++)
-    {
-        
-        sum[i+1] = sum[i] + nums[i];
-        for(int j=0;j<=i;j++)
+        cur += nums[i];
+        int sub = cur - k;
+        HASH_FIND_INT(hp, &sub, p);
+        if(p != NULL)
         {
-            if(sum(i+1) - sum[j] == k)
-            {
-                count++;
-            }
+            ret += p->value;
         }
+        //如果哈希表中已经存在该累积和，则将其计数递增。
+        //否则，创建一个新的节点，并将其添加到哈希表中。
+        HASH_FIND_INT(hp, &cur, p);
+        if(p == NULL)
+        {
+            p = malloc(sizeof(HASH_TABLE));
+            p->key = cur;
+            p->value = 0;
+            HASH_ADD_INT(hp, key, p);
+        }
+        ++(p->value);
     }
+    return ret;
 }
